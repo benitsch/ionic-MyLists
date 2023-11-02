@@ -1,0 +1,7 @@
+{
+  "name": "MyLists",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
