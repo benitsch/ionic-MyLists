@@ -6,7 +6,7 @@ import { IonicModule } from '@ionic/angular';
 
 import { FolderPageRoutingModule } from './folder-routing.module';
 
-import { FolderPage } from './folder.page';
+import { FolderPage } from './pages/folder/folder.page';
 
 @NgModule({
   imports: [

@@ -1,0 +1,51 @@
+//FIXME colors als global css definieren, da ich hier und bei addListModal css das gleiche habe.
+.white {
+  --ion-item-background: #FFFFFF;
+}
+
+.yellow {
+  --ion-item-background: linear-gradient(to bottom right, rgba(251, 248, 204, 1), rgba(251, 248, 204, 0.5));
+}
+
+.orange {
+  --ion-item-background: linear-gradient(to bottom right, rgba(253, 228, 207, 1), rgba(253, 228, 207, 0.5));
+}
+
+.red {
+  --ion-item-background: linear-gradient(to bottom right, rgba(255, 207, 210, 1), rgba(255, 207, 210, 0.5));
+}
+
+.pink {
+  --ion-item-background: linear-gradient(to bottom right, rgba(241, 192, 232, 1), rgba(241, 192, 232, 0.5));
+}
+
+.purple {
+  --ion-item-background: linear-gradient(to bottom right, rgba(207, 186, 240, 1), rgba(207, 186, 240, 0.5));
+}
+
+.blue {
+  --ion-item-background: linear-gradient(to bottom right, rgba(163, 196, 243, 1), rgba(163, 196, 243, 0.5));
+}
+
+.blue-light {
+  --ion-item-background: linear-gradient(to bottom right, rgba(144, 219, 244, 1), rgba(144, 219, 244, 0.5));
+}
+
+.turquoise {
+  --ion-item-background: linear-gradient(to bottom right, rgba(142, 236, 245, 1), rgba(142, 236, 245, 0.5));
+}
+
+.green-light {
+  --ion-item-background: linear-gradient(to bottom right, rgba(152, 245, 225, 1), rgba(152, 245, 225, 0.5));
+}
+
+.green {
+  --ion-item-background: linear-gradient(to bottom right, rgba(185, 251, 192, 1), rgba(185, 251, 192, 0.5));
+}
+
+ion-item::part(native) {
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+}

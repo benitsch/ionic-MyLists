@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Artikelname</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">Schließen</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-input placeholder="Name eingeben..." autofocus="true" fill="solid" inputmode="text" required="true"
+               [clearInput]="true" [(ngModel)]="articleName" (ionInput)="searchbarInput($event)"></ion-input>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="light" class="ion-padding">
+  <ion-list id="modal-list" [inset]="true" *ngIf="filteredItems.length">
+    <ion-item *ngFor="let item of filteredItems" (click)="onSuggestionClick(item)">
+      <ion-label>{{ item }}</ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="onAddIconClick()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

@@ -1,0 +1,19 @@
+<ion-item-sliding>
+  <ion-item>
+    <ion-checkbox [(ngModel)]="article.checked" labelPlacement="start" color="success">
+      <div class="checkbox-container" #checkboxContainer>
+        <div class="text-container" [ngClass]="{'line-through': article.checked}">
+          <div class="article-name" #articleName>{{article.name}}</div>
+          <ion-note *ngIf="article.validFrom || article.validUntil">{{ article.validFrom | validDateRange: article.validUntil }}</ion-note>
+        </div>
+        <ion-thumbnail class="sale-img" slot="end" *ngIf="article.inSale || article.buyWithDiscount">
+          <ion-img alt="A sale image" src="{{getSaleImgPath()}}" />
+        </ion-thumbnail>
+      </div>
+    </ion-checkbox>
+  </ion-item>
+
+  <ion-item-options>
+    <ion-item-option color="danger" (click)="deleteArticle()">Delete</ion-item-option>
+  </ion-item-options>
+</ion-item-sliding>

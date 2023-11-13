@@ -1,0 +1,40 @@
+.checkbox-container {
+  display: flex;
+  align-items: center;
+
+  .text-container {
+    display: flex;
+    flex-direction: column;
+    &.line-through {
+      text-decoration: line-through;
+    }
+    .article-name.scroll-text {
+      transform: translateX(100%);
+      animation: side-scroll-animation 15s linear infinite;
+    }
+  }
+
+  .sale-img {
+    margin-left: 1rem;
+    width: 1.8rem;
+    height: auto;
+  }
+}
+
+@keyframes side-scroll-animation {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+ion-item::part(native) {
+  margin: 5px auto;
+  background: white;
+  border-color: #ccc;
+  border-width: 1px;
+  border-radius: 8px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
