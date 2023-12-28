@@ -3,41 +3,60 @@
     <ion-buttons slot="start">
       <ion-back-button default-href="#"></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ list.name }}</ion-title>
-    <div slot="end">
-      <ion-icon name="people-outline"></ion-icon>
-      <span>1</span>
-    </div>
+    <ion-title *ngIf="!isLoading">{{ list.name }}</ion-title>
+<!--    <div slot="end">-->
+<!--      <ion-icon name="people-outline"></ion-icon>-->
+<!--      <span>1</span>-->
+<!--    </div>-->
+    <ion-progress-bar *ngIf="isLoading" type="indeterminate"></ion-progress-bar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-segment [(ngModel)]="selectedStore">
-    <ion-segment-button *ngFor="let store of storeItems | keyvalue" layout="icon-start" [value]="store.key">
-      <ion-label>{{store.key}}</ion-label>
-      <ion-icon src="{{getSvgPathForStore(store.key)}}"></ion-icon>
-    </ion-segment-button>
-  </ion-segment>
+<ion-content [fullscreen]="true" *ngIf="!isLoading">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <ng-container *ngFor="let store of storeItems | keyvalue">
-    <ng-container *ngIf="selectedStore === store.key">
-      <ng-container *ngFor="let category of store.value | keyvalue">
-        <ion-list lines="none">
-          <ion-list-header lines="full" color="light">
+  <ng-container *ngIf="list.articles.length; else noArticles">
+    <ion-segment [(ngModel)]="selectedStore">
+      <ion-segment-button *ngFor="let store of storeItems | keyvalue" layout="icon-start" [value]="store.key">
+        <ion-label>{{store.key}}</ion-label>
+        <ion-icon src="{{getSvgPathForStore(store.key)}}"></ion-icon>
+      </ion-segment-button>
+    </ion-segment>
+
+    <ng-container *ngFor="let store of storeItems | keyvalue">
+      <ng-container *ngIf="selectedStore === store.key">
+        <ng-container *ngFor="let category of store.value | keyvalue">
+          <ion-list lines="none" class="bg-transparent">
+            <ion-list-header lines="full" color="light">
               <ion-label style="display: flex;">
                 {{category.key}}
-<!--                <ion-img src="assets/images/stores/adeg.svg" style="height: 1rem; "></ion-img>-->
+                <!--                <ion-img src="assets/images/stores/adeg.svg" style="height: 1rem; "></ion-img>-->
               </ion-label>
-          </ion-list-header>
-          <app-article *ngFor="let article of category.value" [article]="article" (deleteArticleEvent)="deleteArticle($event)"></app-article>
-        </ion-list>
+            </ion-list-header>
+            <app-article *ngFor="let article of category.value" [article]="article" [listId]="listId"
+                         (deleteArticleEvent)="deleteArticle($event)"></app-article>
+          </ion-list>
+        </ng-container>
       </ng-container>
     </ng-container>
   </ng-container>
+
+  <ng-template #noArticles>
+    <div class="no-articles-container">
+      <ion-img class="no-articles-img" src="assets/images/no-data.png"></ion-img>
+      <h2 class="no-articles-title ion-no-margin">Liste ist leer</h2>
+      <p>Wie wärs, wenn du ein paar Artikel hinzufügen?</p>
+    </div>
+    <ion-icon name="arrow-forward-outline" class="no-data-arrow"></ion-icon>
+  </ng-template>
+
 
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
     <ion-fab-button (click)="openAddArticleModal()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
+
 </ion-content>

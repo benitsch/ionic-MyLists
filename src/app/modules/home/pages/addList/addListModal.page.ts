@@ -1,9 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ModalController} from '@ionic/angular';
 import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {Article, User} from "@data/interfaces/interfaces";
-
 import List from "@shared/models/List";
+import {AuthService} from "@data/services/authentication/auth.service";
 
 @Component({
   selector: 'app-add-list-modal',
@@ -12,28 +11,45 @@ import List from "@shared/models/List";
 })
 export class AddListModalPage implements OnInit {
   @Input() listToEdit: List | null = null;
-  private id: string;
-  private articles: Article[] = [];
-  private users: User[] = []
   myForm!: FormGroup;
   isEditing: boolean = false;
-  circleColors: string[] = ['white', 'yellow', 'orange', 'red', 'pink', 'purple', 'blue', 'blue-light', 'turquoise', 'green-light', 'green'];
+  circleColors: string[] = ['yellow', 'orange', 'red', 'pink', 'purple', 'blue', 'blue-light', 'turquoise', 'green-light', 'green'];
   selectedColor: string = 'white';
 
-  constructor(private modalController: ModalController, private formBuilder: FormBuilder) {
-    // TODO change to dynamically id (by firebase?)
-    this.id = "new-test-list-123";
+  private prefersDark = false;
+
+  constructor(
+    private authService: AuthService,
+    private modalController: ModalController,
+    private formBuilder: FormBuilder
+  ) {
+    this.prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (this.prefersDark) {
+      this.circleColors.unshift('black');
+    } else {
+      this.circleColors.unshift('white');
+    }
   }
 
   ngOnInit() {
+    this.setupData();
+    this.setupForm();
+  }
+
+  setupData(): void {
     this.isEditing = !!this.listToEdit;
 
+    if (this.isEditing && this.listToEdit) {
+      this.selectedColor = this.listToEdit.color;
+    }
+  }
+
+  setupForm(): void {
     this.myForm = this.formBuilder.group({
       listName: ['', [Validators.required]],
     });
 
     if (this.isEditing && this.listToEdit) {
-      this.selectedColor = this.listToEdit.color;
       this.myForm.patchValue({
         listName: this.listToEdit.name,
       });
@@ -62,14 +78,27 @@ export class AddListModalPage implements OnInit {
       }
     });
     if (this.myForm.valid) {
-      const newList = new List(
-        this.id,
-        this.listName.value,
-        this.articles,
-        this.users,
+      let list: List;
+
+      if (this.isEditing && this.listToEdit) {
+        // Update List
+        this.listToEdit.name = this.listName.value;
+        this.listToEdit.color = this.selectedColor;
+        list = this.listToEdit;
+      } else {
+        // Create new List
+        list = new List(
+          this.listName.value,
+          [],
+          this.selectedColor,
         );
-      newList.color = this.selectedColor;
-      await this.modalController.dismiss(newList);
+        const userId = this.authService.getCurrentUserId();
+        if (userId) {
+          list.createdBy = userId;
+        }
+      }
+
+      await this.modalController.dismiss(list);
     }
   }
 

@@ -12,7 +12,8 @@
       "@modules/*": ["app/modules/*"],
       "@data/*": ["app/data/*"],
       "@layout/*": ["app/layout/*"],
-      "@images/*": ["assets/images/*"]
+      "@images/*": ["assets/images/*"],
+      "@constants/*": ["app/data/constants"],
     },
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,

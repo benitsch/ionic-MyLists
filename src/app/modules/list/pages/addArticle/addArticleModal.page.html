@@ -11,7 +11,7 @@
   <form [formGroup]="myForm">
     <ion-item [button]="true" [detail]="false" lines="none" id="select-article">
       <ion-input formControlName="articleName" label="Artikelname" labelPlacement="floating"
-                    value="{{ articleName.value }}" errorText="Ungültiger Artikelname">
+                 value="{{ articleName.value }}" errorText="Ein Artikelname ist erforderlich.">
       </ion-input>
     </ion-item>
 
@@ -22,24 +22,26 @@
 
     <ion-item>
       <ion-select label="Markt" interface="popover" label-placement="floating" formControlName="selectedStore">
-        <ion-select-option *ngFor="let store of getStores()" value="{{store.key}}">{{store.value}}</ion-select-option>
-      </ion-select>
-    </ion-item>
-
-    <ion-item>
-      <ion-select label="Kategorie" interface="popover" label-placement="floating" formControlName="category">
-        <ion-select-option value="{{ category.key }}" *ngFor="let category of getArticleCategories()">
-          {{ category.value }}
+        <ion-select-option *ngFor="let store of stores; index as i" value="{{i}}">
+          {{store.name}}
         </ion-select-option>
       </ion-select>
     </ion-item>
 
     <ion-item>
-      <ion-checkbox labelPlacement="start" formControlName="buyWithDiscount">Nur mit Rabattmarkerl</ion-checkbox>
+      <ion-select label="Kategorie" interface="popover" label-placement="floating" formControlName="selectedCategory">
+        <ion-select-option *ngFor="let category of articleCategories; index as i" value="{{i}}">
+          {{ category }}
+        </ion-select-option>
+      </ion-select>
     </ion-item>
 
     <ion-item>
-      <ion-checkbox labelPlacement="start" formControlName="inSale">In Sale</ion-checkbox>
+      <ion-checkbox labelPlacement="start" formControlName="buyWithDiscount">Nur mit -25% Pickerl</ion-checkbox>
+    </ion-item>
+
+    <ion-item>
+      <ion-checkbox labelPlacement="start" formControlName="inSale">In Aktion</ion-checkbox>
     </ion-item>
 
     <ion-item *ngIf="inSale?.value" lines="inset">
@@ -56,14 +58,14 @@
     </ion-item>
 
     <ion-item *ngIf="inSale?.value" lines="inset">
-        <ion-label>Valid Until</ion-label>
-        <ion-datetime-button datetime="validToDateTime"></ion-datetime-button>
-        <ion-modal [keepContentsMounted]="true">
-          <ng-template>
-            <ion-datetime id="validToDateTime" presentation="date" [firstDayOfWeek]="1" [min]="minValidUntil"
-                          formControlName="validUntil"></ion-datetime>
-          </ng-template>
-        </ion-modal>
+      <ion-label>Valid Until</ion-label>
+      <ion-datetime-button datetime="validToDateTime"></ion-datetime-button>
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime id="validToDateTime" presentation="date" [firstDayOfWeek]="1" [min]="minValidUntil"
+                        formControlName="validUntil"></ion-datetime>
+        </ng-template>
+      </ion-modal>
     </ion-item>
 
     <ion-button expand="full" (click)="saveArticle()">Speichern</ion-button>
@@ -75,6 +77,7 @@
     <app-typeahead
       class="ion-page"
       [articleName]=articleName.value
+      (addIconClick)="articleAddClick($event)"
       (suggestionClick)="articleSuggestionClick($event)"
       (suggestionCancel)="articleSuggestionModal.dismiss()"
     ></app-typeahead>

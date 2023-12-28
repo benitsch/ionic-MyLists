@@ -12,12 +12,11 @@
 </ion-header>
 
 <ion-content color="light" class="ion-padding">
-  <ion-list id="modal-list" [inset]="true" *ngIf="filteredItems.length">
-    <ion-item *ngFor="let item of filteredItems" (click)="onSuggestionClick(item)">
-      <ion-label>{{ item }}</ion-label>
+  <ion-list id="modal-list" [inset]="true" *ngIf="filteredSuggestedArticles.length">
+    <ion-item *ngFor="let item of filteredSuggestedArticles" class="suggestion-item" (click)="onSuggestionClick(item)">
+      <ion-label>{{ item.name }}</ion-label>
     </ion-item>
   </ion-list>
-
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
     <ion-fab-button (click)="onAddIconClick()">
       <ion-icon name="add"></ion-icon>

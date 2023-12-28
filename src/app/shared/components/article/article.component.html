@@ -1,9 +1,9 @@
 <ion-item-sliding>
   <ion-item>
-    <ion-checkbox [(ngModel)]="article.checked" labelPlacement="start" color="success">
+    <ion-checkbox [(ngModel)]="article.checked" (ngModelChange)="onCheckboxChange()" labelPlacement="start" color="success">
       <div class="checkbox-container" #checkboxContainer>
         <div class="text-container" [ngClass]="{'line-through': article.checked}">
-          <div class="article-name" #articleName>{{article.name}}</div>
+          <div class="article-name" #articleName>{{article.name | articleName: article.amount}}</div>
           <ion-note *ngIf="article.validFrom || article.validUntil">{{ article.validFrom | validDateRange: article.validUntil }}</ion-note>
         </div>
         <ion-thumbnail class="sale-img" slot="end" *ngIf="article.inSale || article.buyWithDiscount">

@@ -6,11 +6,12 @@ import {DatePipe} from '@angular/common';
 import {IonicModule} from '@ionic/angular';
 import {ArticleComponent} from "@components/article/article.component";
 import {ValidDateRangePipe} from "@shared/pipes/ValidDateRangePipe";
+import {ArticleName} from "@shared/pipes/ArticleName";
 
 
 @NgModule({
   imports: [CommonModule, FormsModule, IonicModule, RouterModule],
-  declarations: [ArticleComponent, ValidDateRangePipe],
+    declarations: [ArticleComponent, ValidDateRangePipe, ArticleName],
   providers: [DatePipe],
   exports: [ArticleComponent]
 })

@@ -5,46 +5,59 @@
     </ion-buttons>
     <ion-title>Meine Listen</ion-title>
     <ion-buttons slot="end">
-      <ion-button  (click)="toggleEdit()">Bearbeiten</ion-button>
+      <ion-button *ngIf="lists.length" (click)="toggleEdit()">Bearbeiten</ion-button>
     </ion-buttons>
+    <ion-progress-bar *ngIf="isLoading" type="indeterminate"></ion-progress-bar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">
-        Listen
-      </ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" *ngIf="!isLoading">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <ng-container>
-    <ion-list [inset]="true">
+  <ng-container *ngIf="lists.length; else noArticles">
+    <ion-list [inset]="true" class="bg-transparent">
       <ion-reorder-group [disabled]="isReorderDisabled" (ionItemReorder)="handleReorder($any($event))">
-        <ion-item-sliding *ngFor="let list of getLists(); trackBy: trackItems">
-          <ion-item [ngClass]="list.color" routerDirection="root" [routerLink]="isReorderDisabled ? ['/list/' + list.id] : []" lines="none" detail="false" routerLinkActive="selected">
-            <ion-icon slot="start" name="create-outline" *ngIf="!isReorderDisabled" (click)="openAddListModal(list)"></ion-icon>
+        <ion-item-sliding *ngFor="let list of lists">
+          <ion-item class="ion-margin-bottom" [ngClass]="list.color"
+                    [routerLink]="isReorderDisabled ? ['/list/' + list.docId] : []" lines="none" detail="false"
+                    routerLinkActive="selected">
+            <ion-icon slot="start" name="create-outline" *ngIf="!isReorderDisabled"
+                      (click)="openAddListModal(list)"></ion-icon>
             <ion-label>
               <h1>{{list.name}}</h1>
+<!--              <ion-icon *ngFor="let n of test" name="person-circle-outline" size="large"></ion-icon>-->
+
               <ion-icon name="person-circle-outline" size="large"></ion-icon>
-              <ion-icon name="add-circle-outline" size="large" *ngIf="!isReorderDisabled" (click)="openCamera()"></ion-icon>
+              <ion-icon name="add-circle-outline" size="large" *ngIf="!isReorderDisabled && userIsListOwner(list)"
+                        (click)="openCamera(list)"></ion-icon>
             </ion-label>
-            <ion-badge>{{list.articles.length}} Artikel</ion-badge>
+            <ion-badge>{{list.articlesCount}} Artikel</ion-badge>
             <ion-reorder slot="end"></ion-reorder>
           </ion-item>
           <ion-item-options>
-            <ion-item-option color="danger" (click)="deleteList(list)">Delete</ion-item-option>
+            <ion-item-option class="ion-margin-bottom border" color="danger" (click)="deleteList(list)">Löschen
+            </ion-item-option>
           </ion-item-options>
         </ion-item-sliding>
       </ion-reorder-group>
     </ion-list>
   </ng-container>
 
+  <ng-template #noArticles>
+    <div class="no-articles-container">
+      <ion-img class="no-articles-img" src="assets/images/empty-list.png"></ion-img>
+      <h2 class="no-articles-title ion-no-margin">Keine Listen vorhanden</h2>
+      <p>Warum fügst du nicht ein paar hinzu?</p>
+    </div>
+    <ion-icon name="arrow-forward-outline" class="no-data-arrow"></ion-icon>
+  </ng-template>
 
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
     <ion-fab-button (click)="openAddListModal()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
+
 </ion-content>

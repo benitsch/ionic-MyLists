@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import Store from "@shared/models/Store";
-import {StoreCategory, StoreName} from "@data/interfaces/interfaces";
+import {DataService} from "@data/services/api/data.service";
 
 @Component({
   selector: 'app-stores',
@@ -10,21 +10,34 @@ import {StoreCategory, StoreName} from "@data/interfaces/interfaces";
 export class StoresPage implements OnInit {
   stores: Store[] = [];
 
-  constructor() { }
+  isLoading: boolean = false;
+
+  private dataService = inject(DataService);
+
+  constructor() {
+  }
 
   ngOnInit() {
-    Object.values(StoreName).forEach((storeName: StoreName) => {
-      const store = new Store(storeName);
-      this.stores.push(store);
-    });
+    this.loadStores()
+  }
+
+  async loadStores(): Promise<void> {
+    this.isLoading = true;
+    this.stores = await this.dataService.getStores();
+    this.isLoading = false;
   }
 
   toggleFavorite(store: Store): void {
     store.isFavourite = !store.isFavourite;
+    this.dataService.updateStore(this.stores);
   }
 
   isFavorite(store: Store): boolean {
     return store.isFavourite;
   }
 
+  async handleRefresh(event: any): Promise<void> {
+    await this.loadStores();
+    event.target.complete();
+  }
 }

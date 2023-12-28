@@ -5,24 +5,21 @@
     </ion-buttons>
     <ion-title>Märkte</ion-title>
   </ion-toolbar>
+  <ion-progress-bar *ngIf="isLoading" type="indeterminate"></ion-progress-bar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">
-        Märkte
-      </ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
   <ion-grid [fixed]="true">
     <ion-row>
       <ng-container *ngFor="let store of stores" class="store-tile-container">
         <ion-col class="store-tile" [style.background-color]="store.getColorCode()" (click)="toggleFavorite(store)">
           <ion-icon [name]="isFavorite(store) ? 'star-sharp' : 'star-outline'" size="large" class="favorite-icon"></ion-icon>
-          {{ store.name }}
-          <div class="store-background" [style.background-image]="'url(' + store.getCategoryImageUrl() + ')'"></div>
+          <ion-label>{{ store.name }}</ion-label>
+          <div class="store-background" [style.background-image]="'url(' + store.getCategoryImagePath() + ')'"></div>
         </ion-col>
       </ng-container>
     </ion-row>

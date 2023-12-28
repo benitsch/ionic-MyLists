@@ -1,74 +1,67 @@
-// export interface List {
-//   id: string,
-//   name: string,
-//   articles: Article[],
-//   users: User[],
-// }
-
 import Store from "@shared/models/Store";
+// import {Timestamp} from "@angular/fire/firestore";
+import {FieldValue} from "@firebase/firestore";
 
 export interface Article {
   name: string,
   checked: boolean,
+  checkedTimestamp?: FieldValue,
   inSale: boolean,
   buyWithDiscount: boolean,
   validFrom: string|null,
   validUntil: string|null,
-  category: ArticleCategory,
+  category: typeof ArticleCategoryArray[number],
   amount: number,
   store: Store,
+  docId: string,
 }
 
-export interface User {
-  id: string,
-  firstName: string,
-  lastName: string,
-  email: string,
-}
-
-export enum ArticleCategory {
-  FruitAndVegetables = 'Obst & Gemüse',
-  Sweets = 'Süßes',
-  MeatAndFish = 'Fleisch & Fisch',
-  Beverages = 'Getränke',
-  Other = 'Sonstiges',
-}
-
-// export interface Store {
-//   name: StoreName,
-//   category: StoreCategory,
+// export interface User {
+//   id: string,
+//   firstName: string,
+//   lastName: string,
+//   email: string,
 // }
 
-export enum StoreName {
-  Adeg = 'Adeg',
-  Spar = 'Spar',
-  Billa = 'Billa',
-  BillaPlus = 'Billa+',
-  Hofer = 'Hofer',
-  Penny = 'Penny',
-  Unimarkt = 'Unimarkt',
-  Norma = 'Norma',
-  MPreis = 'MPreis',
-  TAndG = 'T&G',
-  Bipa = 'Bipa',
-  Dm = 'Dm',
-  Mueller = 'Müller',
-  MediaMarkt = 'MediaMarkt',
-  Obi = 'Obi',
-  Hornbach = 'Hornbach',
-  Lagerhaus = 'Lagerhaus',
-  Lutz = 'Lutz',
-  Moebelix = 'Möbelix',
-  Hervis = 'Hervis',
-  Intersport = 'Intersport',
-  PeekAndCloppenburg = 'Peek & Cloppenburg',
-  HAndM = 'H&M',
-  Action = 'Action',
-  Tedi = 'Tedi',
-  Pagro = 'Pagro',
-  TKMaxx = 'TK MAxx',
-  Gruber = 'Gruber',
-}
+export const ArticleCategoryArray = [
+  'Obst & Gemüse',
+  'Süßes',
+  'Fleisch & Fisch',
+  'Getränke',
+  'Sonstiges',
+] as const;
+
+export const StoreNamesArray: string[] = [
+  'Adeg',
+  'Spar',
+  'Billa',
+  'Billa+',
+  'Hofer',
+  'Penny',
+  'Unimarkt',
+  'Norma',
+  'MPreis',
+  'T&G',
+  'Bipa',
+  'Dm',
+  'Müller',
+  'MediaMarkt',
+  'Obi',
+  'Hornbach',
+  'Lagerhaus',
+  'Lutz',
+  'Möbelix',
+  'Hervis',
+  'Intersport',
+  'Peek & Cloppenburg',
+  'H&M',
+  'Action',
+  'Tedi',
+  'Pagro',
+  'TK MAxx',
+  'Gruber',
+];
+
 
 export enum StoreCategory {
   GroceryStore = 'Lebensmittelladen',
@@ -88,4 +81,17 @@ export interface StoreArticles {
 
 export interface CategoryArticles {
   [categoryName: string]: Article[];
+}
+
+export interface FirestoreStore {
+  name: typeof StoreNamesArray[number],
+  isFavourite: boolean,
+  category: string,
+}
+
+export type SuggestedArticle = {
+  name: string,
+  category?: typeof ArticleCategoryArray[number],
+  store?: typeof StoreNamesArray[number],
+  storeCategory?: StoreCategory,
 }

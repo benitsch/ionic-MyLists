@@ -1,19 +1,19 @@
-import {Article, StoreArticles, User} from "@data/interfaces/interfaces";
+import {Article, StoreArticles} from "@data/interfaces/interfaces";
 
 class List {
-  id: string;
   name: string;
   articles: Article[];
-  users: User[];
-  color: string = 'white';
+  color: string;
+  docId: string = '';
+  articlesCount: number = 0;
+  createdBy: string = '';
+  amountOfUsers: number = 0;
 
-  constructor(id: string, name: string, articles: Article[], users: User[]) {
-    this.id = id;
+  constructor(name: string, articles: Article[] = [], color: string = 'white') {
     this.name = name;
     this.articles = articles;
-    this.users = users;
+    this.color = color;
   }
-
 
   getSortedArticles(): StoreArticles {
     return this.groupArticlesByStoreAndCategory();

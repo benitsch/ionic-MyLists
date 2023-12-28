@@ -9,32 +9,35 @@
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
 :root {
-  --ion-background-color: #fcfcfc;
-  --ion-background-color-rgb: 252,252,252;
+  //--ion-background-color: #fcfcfc;
+  //--ion-background-color-rgb: 252,252,252;
+  //
+  //--ion-text-color: #323232;
+  //--ion-text-color-rgb: 50,50,50;
+  //
+  //--ion-color-step-50: #f2f2f2;
+  //--ion-color-step-100: #e8e8e8;
+  //--ion-color-step-150: #dedede;
+  //--ion-color-step-200: #d4d4d4;
+  //--ion-color-step-250: #cacaca;
+  //--ion-color-step-300: #bfbfbf;
+  //--ion-color-step-350: #b5b5b5;
+  //--ion-color-step-400: #ababab;
+  //--ion-color-step-450: #a1a1a1;
+  //--ion-color-step-500: #979797;
+  //--ion-color-step-550: #8d8d8d;
+  //--ion-color-step-600: #838383;
+  //--ion-color-step-650: #797979;
+  //--ion-color-step-700: #6f6f6f;
+  //--ion-color-step-750: #656565;
+  //--ion-color-step-800: #5a5a5a;
+  //--ion-color-step-850: #505050;
+  //--ion-color-step-900: #464646;
+  //--ion-color-step-950: #3c3c3c;
 
-  --ion-text-color: #323232;
-  --ion-text-color-rgb: 50,50,50;
-
-  --ion-color-step-50: #f2f2f2;
-  --ion-color-step-100: #e8e8e8;
-  --ion-color-step-150: #dedede;
-  --ion-color-step-200: #d4d4d4;
-  --ion-color-step-250: #cacaca;
-  --ion-color-step-300: #bfbfbf;
-  --ion-color-step-350: #b5b5b5;
-  --ion-color-step-400: #ababab;
-  --ion-color-step-450: #a1a1a1;
-  --ion-color-step-500: #979797;
-  --ion-color-step-550: #8d8d8d;
-  --ion-color-step-600: #838383;
-  --ion-color-step-650: #797979;
-  --ion-color-step-700: #6f6f6f;
-  --ion-color-step-750: #656565;
-  --ion-color-step-800: #5a5a5a;
-  --ion-color-step-850: #505050;
-  --ion-color-step-900: #464646;
-  --ion-color-step-950: #3c3c3c;
+  --ion-margin: 8px;
 }
+
 
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
@@ -51,3 +54,32 @@
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
+
+.no-data-arrow {
+  animation: slide2 3s ease-in-out infinite;
+  color: lightgray;
+  height: 80px;
+  width: 80px;
+  position: absolute;
+  right: 3rem;
+  bottom: 3rem;
+}
+
+@keyframes slide2 {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(45deg);
+  }
+
+  50% {
+    transform: translate(10px, 10px) rotate(45deg);
+  }
+}
+
+ion-content {
+  --background: transparent url('./assets/images/bg5.png') no-repeat center center / cover;
+}
+
+.bg-transparent {
+  background: transparent;
+}

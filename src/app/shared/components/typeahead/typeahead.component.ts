@@ -1,6 +1,7 @@
 import {Component, Output, EventEmitter, inject, Input} from '@angular/core';
 import type {OnInit} from '@angular/core';
 import {DataService} from "@data/services/api/data.service";
+import {SuggestedArticle} from "@data/interfaces/interfaces";
 
 @Component({
   selector: 'app-typeahead',
@@ -9,30 +10,35 @@ import {DataService} from "@data/services/api/data.service";
 })
 export class TypeaheadComponent implements OnInit {
   @Input() articleName: string = '';
-  @Output() suggestionClick = new EventEmitter<string>();
+  @Output() addIconClick = new EventEmitter<string>();
+  @Output() suggestionClick = new EventEmitter<SuggestedArticle>();
   @Output() suggestionCancel = new EventEmitter<void>();
 
-  items: string[] = [];
-  filteredItems: string[] = [];
+  suggestedArticles: SuggestedArticle[] = [];
+  filteredSuggestedArticles: SuggestedArticle[] = [];
 
   private dataService = inject(DataService);
 
   ngOnInit() {
-    this.items = this.dataService.getArticleSuggestions();
-    this.filteredItems = [...this.items];
+    this.loadArticleSuggestions();
+  }
+
+  async loadArticleSuggestions(): Promise<void> {
+    this.suggestedArticles = await this.dataService.getArticleSuggestions();
+    this.filteredSuggestedArticles = [...this.suggestedArticles];
   }
 
   close(): void {
     this.suggestionCancel.emit();
   }
 
-  onSuggestionClick(articleName: any): void {
-    this.suggestionClick.emit(articleName);
+  onSuggestionClick(suggestedArticle: SuggestedArticle): void {
+    this.suggestionClick.emit(suggestedArticle);
   }
 
   onAddIconClick(): void {
     if (this.articleName !== '') {
-      this.suggestionClick.emit(this.articleName.trim());
+      this.addIconClick.emit(this.articleName.trim());
     }
   }
 
@@ -52,7 +58,7 @@ export class TypeaheadComponent implements OnInit {
      * return all options.
      */
     if (searchQuery === undefined) {
-      this.filteredItems = [...this.items];
+      this.filteredSuggestedArticles = [...this.suggestedArticles];
     } else {
       /**
        * Otherwise, normalize the search
@@ -60,8 +66,8 @@ export class TypeaheadComponent implements OnInit {
        * contain the search query as a substring.
        */
       const normalizedQuery = searchQuery.toLowerCase();
-      this.filteredItems = this.items.filter((item: string) => {
-        return item.toLowerCase().includes(normalizedQuery);
+      this.filteredSuggestedArticles = this.suggestedArticles.filter((item: SuggestedArticle) => {
+        return item.name.toLowerCase().includes(normalizedQuery);
       });
     }
   }

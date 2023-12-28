@@ -1,10 +1,11 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DataService} from "@data/services/api/data.service";
-import {Article, StoreArticles, StoreName} from "@data/interfaces/interfaces";
+import {Article, StoreArticles} from "@data/interfaces/interfaces";
 import List from "@shared/models/List";
 import {ModalController} from "@ionic/angular";
 import {AddArticleModalPage} from "@modules/list/pages/addArticle/addArticleModal.page";
+import {Timestamp} from "@angular/fire/firestore";
 
 @Component({
   selector: 'app-list',
@@ -12,32 +13,71 @@ import {AddArticleModalPage} from "@modules/list/pages/addArticle/addArticleModa
   styleUrls: ['./list.page.scss'],
 })
 export class ListPage implements OnInit {
-  private listId!: string;
+  listId!: string;
   public list!: List;
   public storeItems!: StoreArticles;
   public selectedStore!: string;
+
+  isLoading: boolean = false;
 
   private dataService = inject(DataService);
   private activatedRoute = inject(ActivatedRoute);
 
   constructor(public modalController: ModalController) {
+    this.listId = this.activatedRoute.snapshot.paramMap.get('id') as string;
   }
 
   ngOnInit() {
     this.setupList();
-    this.setupSegments();
   }
 
-  setupList(): void {
-    this.listId = this.activatedRoute.snapshot.paramMap.get('id') as string;
-    this.list = this.dataService.getListById(0);
-    // TODO get list by item id
+  async setupList(): Promise<void> {
+    this.isLoading = true;
+    this.dataService.getListById(this.listId).then((value: List | null) => {
+      if (value) {
+        this.list = value;
+        this.dataService.getArticlesByListId(this.listId).then((value: Article[]) => {
+          this.list.articles = this.filterOldCheckedArticles(value);
+          this.setupSegments();
+          this.isLoading = false;
+        });
+      }
+    });
+  }
+
+  /**
+   * Deletes all articles at the server which were checked in the past.
+   * Returns a list of articles where "checked" is not older than yesterday.
+   *
+   * @param {Article[]} articles
+   */
+  filterOldCheckedArticles(articles: Article[]): Article[] {
+    const filteredArticles: Article[] = [];
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    articles.forEach((article: Article) => {
+      if (article.checkedTimestamp && article.checkedTimestamp instanceof Timestamp) {
+
+        const jsTimestamp = new Date(article.checkedTimestamp.toMillis());
+        if (article.checked && jsTimestamp < yesterday) {
+          this.dataService.deleteArticle(this.listId, article);
+        } else {
+          filteredArticles.push(article);
+        }
+      } else {
+        filteredArticles.push(article);
+      }
+    });
+
+    return filteredArticles;
   }
 
   setupSegments(): void {
     this.storeItems = this.list.getSortedArticles();
     // FIXME when i delete articles, the first elm for selectedStore is sometimes different (alphabetically?).
-    // Ebenso wenn ich artikel von stores lösche, dann soll er den letzten verbleibenden store (segment) auswählen (this.selectedStore setzten).
+    // Ebenso wenn ich artikel von stores lösche, dann soll er den letzten verbleibenden store (segment) auswählen (this.selectedStore setzen).
     this.selectedStore = Object.keys(this.storeItems)[0];
   }
 
@@ -51,9 +91,13 @@ export class ListPage implements OnInit {
     await modal.present();
 
     const rs = await modal.onWillDismiss();
-    if (rs.data) { // Modal is closed with save btn, not with cancel btn
-      this.list.addArticle(rs.data as Article);
-      this.storeItems = this.list.getSortedArticles();
+    if (rs.data as Article) { // Modal is closed with save btn, not with cancel btn
+      this.list.addArticle(rs.data);
+      // this.storeItems = this.list.getSortedArticles();
+      this.setupSegments();
+      this.dataService.addArticle(this.listId, rs.data).then((value) => {
+        rs.data.docId = value;
+      });
     }
   }
 
@@ -62,38 +106,44 @@ export class ListPage implements OnInit {
     // Auch wenn ich die Stores/Segments wechsel
     this.list.deleteArticle(article);
     this.storeItems = this.list.getSortedArticles();
+    this.dataService.deleteArticle(this.listId, article);
   }
 
   getSvgPathForStore(storeName: string): string {
     switch (storeName) {
-      case StoreName.Adeg:
+      case 'Adeg':
         return 'assets/images/stores/adeg.svg';
-      case StoreName.Billa:
+      case 'Billa':
         return 'assets/images/stores/billa.svg';
-      case StoreName.BillaPlus:
+      case 'Billa+':
         return 'assets/images/stores/billaplus.svg';
-      case StoreName.Bipa:
+      case 'Bipa':
         return 'assets/images/stores/bipa.svg';
-      case StoreName.Dm:
+      case 'Dm':
         return 'assets/images/stores/dm.svg';
-      case StoreName.Hofer:
+      case 'Hofer':
         return 'assets/images/stores/hofer.svg';
-      case StoreName.MediaMarkt:
+      case 'MediaMarkt':
         return 'assets/images/stores/mediamarkt.svg';
-      case StoreName.MPreis:
+      case 'MPreis':
         return 'assets/images/stores/mpreis.svg';
-      case StoreName.Mueller:
+      case 'Müller':
         return 'assets/images/stores/mueller.svg';
-      case StoreName.Norma:
+      case 'Norma':
         return 'assets/images/stores/norma.svg';
-      case StoreName.Penny:
+      case 'Penny':
         return 'assets/images/stores/penny.svg';
-      case StoreName.Spar:
+      case 'Spar':
         return 'assets/images/stores/spar.svg';
-      case StoreName.Unimarkt:
+      case 'Unimarkt':
         return 'assets/images/stores/unimarkt.svg';
       default:
         return 'assets/images/stores/default.svg';
     }
+  }
+
+  async handleRefresh(event: any): Promise<void> {
+    await this.setupList();
+    event.target.complete();
   }
 }

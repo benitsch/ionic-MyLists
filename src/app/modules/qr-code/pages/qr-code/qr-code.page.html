@@ -8,17 +8,10 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">
-        Mein QR-Code
-      </ion-title>
-    </ion-toolbar>
-  </ion-header>
-
   <div class="vertical-center">
     <div class="center">
-      <ion-img src="assets/images/test-qrcode.svg" class="ion-align-self-end"></ion-img>
+      <qrcode [qrdata]="userId" [width]="256" [errorCorrectionLevel]="'M'"></qrcode>
     </div>
   </div>
+
 </ion-content>

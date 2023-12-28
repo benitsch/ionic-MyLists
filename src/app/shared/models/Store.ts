@@ -1,58 +1,57 @@
-import {StoreCategory, StoreName} from "@data/interfaces/interfaces";
+import {StoreCategory, StoreNamesArray} from "@data/interfaces/interfaces";
 
 class Store {
-  category: StoreCategory;
+  category: StoreCategory = StoreCategory.NonFootStore;
   isFavourite: boolean = false;
 
-  constructor(public name: StoreName) {
+  constructor(public name: typeof StoreNamesArray[number]) {
     this.category = this.getCategoryForStoreName(name);
   }
 
-  private getCategoryForStoreName(name: StoreName): StoreCategory {
+  private getCategoryForStoreName(name: typeof StoreNamesArray[number]): StoreCategory {
     switch (name) {
-      case StoreName.Adeg:
-      case StoreName.Billa:
-      case StoreName.BillaPlus:
-      case StoreName.Hofer:
-      case StoreName.MPreis:
-      case StoreName.Norma:
-      case StoreName.Penny:
-      case StoreName.Spar:
-      case StoreName.Unimarkt:
-      case StoreName.TAndG:
+      case 'Adeg':
+      case 'Billa':
+      case 'Billa+':
+      case 'Hofer':
+      case 'MPreis':
+      case 'Norma':
+      case 'Penny':
+      case 'Spar':
+      case 'Unimarkt':
+      case 'T&G':
         return StoreCategory.GroceryStore;
-      case StoreName.Bipa:
-      case StoreName.Dm:
-      case StoreName.Mueller:
+      case 'Bipa':
+      case 'Dm':
+      case 'Müller':
         return StoreCategory.Drugstore;
-      case StoreName.MediaMarkt:
+      case 'MediaMarkt':
         return StoreCategory.ElectronicsStore;
-      case StoreName.Obi:
-      case StoreName.Hornbach:
-      case StoreName.Lagerhaus:
+      case 'Obi':
+      case 'Hornbach':
+      case 'Lagerhaus':
         return StoreCategory.DIYStore;
-      case StoreName.Action:
-      case StoreName.Tedi:
-      case StoreName.Pagro:
-      case StoreName.TKMaxx:
-        return StoreCategory.NonFootStore;
-      case StoreName.Hervis:
-      case StoreName.Intersport:
+      case 'Hervis':
+      case 'Intersport':
         return StoreCategory.SportsRetailer;
-      case StoreName.Lutz:
-      case StoreName.Moebelix:
+      case 'Lutz':
+      case 'Möbelix':
         return StoreCategory.FurnitureStore;
-      case StoreName.PeekAndCloppenburg:
-      case StoreName.HAndM:
+      case 'Peek&Cloppenburg':
+      case 'H&M':
         return StoreCategory.ClothingStore;
-      case StoreName.Gruber:
+      case 'Gruber':
         return StoreCategory.Butcher;
+      case 'Action':
+      case 'Tedi':
+      case 'Pagro':
+      case 'TKMaxx':
       default:
-        throw new Error(`Unknown store name: ${name}`);
+        return StoreCategory.NonFootStore;
     }
   }
 
-  getCategoryImageUrl(): string {
+  getCategoryImagePath(): string {
     switch (this.category) {
       case StoreCategory.GroceryStore:
         return 'assets/images/categories/apple.png';
@@ -62,8 +61,6 @@ class Store {
         return 'assets/images/categories/box.png';
       case StoreCategory.DIYStore:
         return 'assets/images/categories/wrench.png';
-      case StoreCategory.NonFootStore:
-        return 'assets/images/categories/cart.png';
       case StoreCategory.Butcher:
         return 'assets/images/categories/meat.png';
       case StoreCategory.ElectronicsStore:
@@ -72,6 +69,9 @@ class Store {
         return 'assets/images/categories/medal.png';
       case StoreCategory.ClothingStore:
         return 'assets/images/categories/bag.png';
+      case StoreCategory.NonFootStore:
+      default:
+        return 'assets/images/categories/cart.png';
     }
   }
 
@@ -85,8 +85,6 @@ class Store {
         return '#FBF8CC';
       case StoreCategory.DIYStore:
         return '#FDE4CF';
-      case StoreCategory.NonFootStore:
-        return '#8EECF5';
       case StoreCategory.Butcher:
         return '#FFCFD2';
       case StoreCategory.ElectronicsStore:
@@ -95,6 +93,9 @@ class Store {
         return '#A3C4F3';
       case StoreCategory.ClothingStore:
         return '#CFBAF0';
+      case StoreCategory.NonFootStore:
+      default:
+        return '#8EECF5';
     }
   }
 }

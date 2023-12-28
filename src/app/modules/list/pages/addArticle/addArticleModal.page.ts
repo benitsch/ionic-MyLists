@@ -1,9 +1,9 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, inject, Input, OnInit, ViewChild} from '@angular/core';
 import {IonModal, ModalController} from '@ionic/angular';
 import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {Article, ArticleCategory, StoreName} from "@data/interfaces/interfaces";
+import {Article, ArticleCategoryArray, StoreNamesArray, SuggestedArticle} from "@data/interfaces/interfaces";
 import Store from "@shared/models/Store";
-import {getEnumKeyByValue, getEnumValueByKey} from "@shared/common-functions/common";
+import {DataService} from "@data/services/api/data.service";
 
 @Component({
   selector: 'app-add-article-modal',
@@ -13,15 +13,25 @@ import {getEnumKeyByValue, getEnumValueByKey} from "@shared/common-functions/com
 export class AddArticleModalPage implements OnInit {
   @ViewChild('articleSuggestionModal', {static: true}) articleSuggestionModal!: IonModal;
 
-  @Input() currentStore?: StoreName // Users current selected store segment to set its name as default value in form.
+  @Input() currentStore?: typeof StoreNamesArray[number]; // Users current selected store segment to set its name as default value in form.
+
+  articleCategories: typeof ArticleCategoryArray[number][] = [];
+  stores: Store[] = [];
 
   minValidUntil!: string;
   myForm!: FormGroup;
+
+  private dataService = inject(DataService);
 
   constructor(private modalController: ModalController, private formBuilder: FormBuilder) {
   }
 
   ngOnInit() {
+    this.setupForm();
+    this.setupData();
+  }
+
+  setupForm(): void {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
@@ -33,10 +43,20 @@ export class AddArticleModalPage implements OnInit {
       buyWithDiscount: false,
       validFrom: today.toISOString(),
       validUntil: tomorrow.toISOString(),
-      category: getEnumKeyByValue(ArticleCategory, ArticleCategory.Other),
+      selectedCategory: '',
       amount: ['1', [Validators.required, Validators.min(1)]],
-      selectedStore: this.currentStore ? getEnumKeyByValue(StoreName, this.currentStore) : StoreName.Spar,
+      selectedStore: '0',
     });
+  }
+
+  async setupData(): Promise<void> {
+    this.articleCategories = await this.dataService.getArticleCategories();
+    const otherIdx = this.articleCategories.indexOf('Sonstiges');
+    this.selectedCategory = otherIdx !== -1 ? otherIdx.toString() : '0';
+
+    this.stores = await this.dataService.getStores();
+    const storeIdx = this.stores.findIndex((store: Store) => store.name === (this.currentStore || 'Spar'));
+    this.selectedStore = storeIdx > -1 ? storeIdx.toString() : '0';
   }
 
   get articleName(): FormControl {
@@ -67,9 +87,12 @@ export class AddArticleModalPage implements OnInit {
     this.myForm.get('validUntil')!.setValue(val);
   }
 
+  get selectedCategory(): FormControl {
+    return this.myForm.get('selectedCategory') as FormControl;
+  }
 
-  get category(): FormControl {
-    return this.myForm.get('category') as FormControl;
+  set selectedCategory(val: any) {
+    this.myForm.get('selectedCategory')!.setValue(val);
   }
 
   get amount(): FormControl {
@@ -80,17 +103,36 @@ export class AddArticleModalPage implements OnInit {
     return this.myForm.get('selectedStore') as FormControl;
   }
 
-  async articleSuggestionClick(articleSuggestion: string) {
-    this.articleName = articleSuggestion;
+  set selectedStore(val: any) {
+    this.myForm.get('selectedStore')!.setValue(val);
+  }
+
+  async articleAddClick(articleName: string): Promise<void> {
+    this.articleName = articleName;
     await this.articleSuggestionModal.dismiss();
   }
 
-  getArticleCategories() {
-    return Object.entries(ArticleCategory).map(([key, value]) => ({key, value}));
-  }
+  /**
+   * Handles the click event of the typeahead component when a suggested article was clicked.
+   * Sets the article name, category, and selected store based on the provided suggested article if available.
+   * Dismisses the article suggestion modal afterward.
+   *
+   * @param {SuggestedArticle} suggestedArticle
+   * @returns {Promise<void>}
+   */
+  async articleSuggestionClick(suggestedArticle: SuggestedArticle): Promise<void> {
+    this.articleName = suggestedArticle.name;
+    if (suggestedArticle.category) {
 
-  getStores() {
-    return Object.entries(StoreName).map(([key, value]) => ({key, value}));
+      const categoryNameIdx = this.articleCategories.findIndex((articleCategory: typeof ArticleCategoryArray[number]) => articleCategory === suggestedArticle.category);
+      const otherIdx = this.articleCategories.indexOf('Sonstiges');
+      this.selectedCategory = categoryNameIdx > -1 ? categoryNameIdx.toString() : otherIdx > -1 ? otherIdx.toString() : '0';
+    }
+    if (suggestedArticle.store) {
+      const storeNameIdx = this.stores.findIndex((store: Store) => store.name === suggestedArticle.store);
+      this.selectedStore = storeNameIdx > -1 ? storeNameIdx.toString() : "0";
+    }
+    await this.articleSuggestionModal.dismiss();
   }
 
   updateMinValidUntil(): void {
@@ -128,9 +170,10 @@ export class AddArticleModalPage implements OnInit {
         buyWithDiscount: this.buyWithDiscount.value,
         validFrom: this.inSale.value ? this.validFrom?.value : null,
         validUntil: this.inSale.value ? this.validUntil?.value : null,
-        category: getEnumValueByKey(ArticleCategory, this.category.value) as ArticleCategory,
+        category: this.articleCategories[this.selectedCategory.value],
         amount: +this.amount.value,
-        store: new Store(getEnumValueByKey(StoreName, this.selectedStore.value) as StoreName),
+        store: new Store(this.stores[this.selectedStore.value].name),
+        docId: '',
       };
       await this.modalController.dismiss(newArticle);
     }

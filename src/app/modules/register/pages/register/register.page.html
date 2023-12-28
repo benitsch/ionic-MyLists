@@ -1,0 +1,65 @@
+<ion-content class="ion-padding" [fullscreen]="true">
+  <div style="display: flex; flex-direction: column; align-items: center;">
+    <ion-img src="./assets/images/customer.png" style="height: 10rem;"></ion-img>
+    <h1>Registrieren</h1>
+  </div>
+
+  <form [formGroup]="myForm" (ngSubmit)="register()">
+    <ion-input
+      class="ion-margin-bottom"
+      fill="outline"
+      type="text"
+      label="Name"
+      labelPlacement="floating"
+      formControlName="name"
+      errorText="Ein Name ist erforderlich."
+    >
+    </ion-input>
+
+    <ion-input
+      class="ion-margin-bottom"
+      fill="outline"
+      type="email"
+      label="Email"
+      labelPlacement="floating"
+      formControlName="email"
+      errorText="Eine gültige E-Mail ist erforderlich."
+    >
+    </ion-input>
+
+    <ion-input
+      class="ion-margin-bottom"
+      fill="outline"
+      type="password"
+      label="Passwort"
+      labelPlacement="floating"
+      formControlName="password"
+      errorText="{{getPasswordErrorText()}}"
+    >
+    </ion-input>
+
+    <ion-input
+      class="ion-margin-bottom"
+      fill="outline"
+      type="password"
+      label="Passwort wiederholen"
+      labelPlacement="floating"
+      formControlName="confirmPassword"
+      errorText="Das Passwort stimmt nicht überein."
+    >
+    </ion-input>
+
+    <ion-button disabled="{{myForm.invalid}}" type="submit" expand="block">
+      Registrieren
+    </ion-button>
+  </form>
+
+  <div style="display: flex; flex-direction: column; align-items: center; margin-top: 2rem;">
+    <p class="ion-no-margin" style="font-size: 0.8rem;">Du hast bereits einen Account?</p>
+
+    <ion-button fill="outline" size="small" shape="round" routerLink="/login" routerDirection="back">
+      Login
+    </ion-button>
+  </div>
+
+</ion-content>

@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {AuthService} from "@data/services/authentication/auth.service";
 
 @Component({
   selector: 'app-qr-code',
@@ -7,8 +8,16 @@ import {Component, OnInit} from '@angular/core';
 })
 export class QrCodePage implements OnInit {
 
-  constructor() { }
+  userId: string = '';
+  constructor(
+    private authService: AuthService,
+  ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    const userId = this.authService.getCurrentUserId();
+    if (userId) {
+      this.userId = userId;
+    }
+  }
 
 }
