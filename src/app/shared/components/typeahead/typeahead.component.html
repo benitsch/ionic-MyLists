@@ -6,7 +6,7 @@
     </ion-buttons>
   </ion-toolbar>
   <ion-toolbar>
-    <ion-input placeholder="Name eingeben..." autofocus="true" fill="solid" inputmode="text" required="true"
+    <ion-input #articleNameInput placeholder="Name eingeben..." fill="solid" inputmode="text" required="true" autocapitalize="sentences"
                [clearInput]="true" [(ngModel)]="articleName" (ionInput)="searchbarInput($event)"></ion-input>
   </ion-toolbar>
 </ion-header>

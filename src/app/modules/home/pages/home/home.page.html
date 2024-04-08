@@ -12,31 +12,30 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" *ngIf="!isLoading">
+  
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
   <ng-container *ngIf="lists.length; else noArticles">
-    <ion-list [inset]="true" class="bg-transparent">
-      <ion-reorder-group [disabled]="isReorderDisabled" (ionItemReorder)="handleReorder($any($event))">
+    <ion-list [inset]="true" class="bg-transparent" #list>
+      <ion-reorder-group [disabled]="isEditDisabled" (ionItemReorder)="handleReorder($any($event))">
         <ion-item-sliding *ngFor="let list of lists">
           <ion-item class="ion-margin-bottom" [ngClass]="list.color"
-                    [routerLink]="isReorderDisabled ? ['/list/' + list.docId] : []" lines="none" detail="false"
+                    [routerLink]="isEditDisabled ? ['/list/' + list.docId] : []" lines="none" detail="false"
                     routerLinkActive="selected">
-            <ion-icon slot="start" name="create-outline" *ngIf="!isReorderDisabled"
+            <ion-icon slot="start" name="create-outline" *ngIf="!isEditDisabled"
                       (click)="openAddListModal(list)"></ion-icon>
             <ion-label>
               <h1>{{list.name}}</h1>
-<!--              <ion-icon *ngFor="let n of test" name="person-circle-outline" size="large"></ion-icon>-->
-
               <ion-icon name="person-circle-outline" size="large"></ion-icon>
-              <ion-icon name="add-circle-outline" size="large" *ngIf="!isReorderDisabled && userIsListOwner(list)"
+              <ion-icon name="add-circle-outline" size="large" *ngIf="!isEditDisabled && userIsListOwner(list)"
                         (click)="openCamera(list)"></ion-icon>
             </ion-label>
             <ion-badge>{{list.articlesCount}} Artikel</ion-badge>
             <ion-reorder slot="end"></ion-reorder>
           </ion-item>
-          <ion-item-options>
+          <ion-item-options *ngIf="!isEditDisabled">
             <ion-item-option class="ion-margin-bottom border" color="danger" (click)="deleteList(list)">Löschen
             </ion-item-option>
           </ion-item-options>

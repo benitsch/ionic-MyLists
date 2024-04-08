@@ -45,39 +45,6 @@ export class ForgotPasswordPage implements OnInit {
     return this.myForm.get('email') as FormControl;
   }
 
-  // async showAlert(header: string, message: string) {
-  //   const alert = await this.alertController.create({
-  //     header,
-  //     message,
-  //     buttons: [{
-  //       text: 'OK',
-  //       handler: () => {
-  //         this.router.navigateByUrl('/login', {replaceUrl: true});
-  //       }
-  //     }],
-  //
-  //   });
-  //   await alert.present();
-  // }
-  //
-  // async resetPassword() {
-  //   const loading = await this.loadingController.create();
-  //   await loading.present();
-  //   const rs = await this.authService.resetPassword(this.myForm.value);
-  //   await loading.dismiss();
-  //   // TODO refactor functions to showAlert for success and failure.
-  //   if (!rs) {
-  //     const alert = await this.alertController.create({
-  //       header: 'Zurücksetzten fehlgeschlagen',
-  //       message: 'Bitte versuche es erneut!',
-  //       buttons: ['OK'],
-  //     });
-  //     await alert.present();
-  //     return;
-  //   }
-  //   this.showAlert('Zurücksetzten erfolgreich', 'Überprüfe dein E-Mail Postfach zum Zurücksetzen des Passworts!');
-  // }
-
   async showAlert(header: string, message: string, navigateToLogin: boolean = false) {
     const alert = await this.alertController.create({
       header,
@@ -106,6 +73,4 @@ export class ForgotPasswordPage implements OnInit {
       await this.showAlert('Zurücksetzen erfolgreich', 'Überprüfe dein E-Mail-Postfach zum Zurücksetzen des Passworts.', true);
     }
   }
-
-
 }

@@ -20,6 +20,7 @@ export class ValidDateRangePipe implements PipeTransform {
     const date = new Date(isoDateString);
     const day = this.formatNumber(date.getDate());
     const month = this.formatNumber(date.getMonth() + 1);
+    
     return `${day}.${month}.`;
   }
 

@@ -1,5 +1,5 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {ModalController} from '@ionic/angular';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {IonInput, ModalController} from '@ionic/angular';
 import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import List from "@shared/models/List";
 import {AuthService} from "@data/services/authentication/auth.service";
@@ -10,7 +10,9 @@ import {AuthService} from "@data/services/authentication/auth.service";
   styleUrls: ['./addListModal.page.scss'],
 })
 export class AddListModalPage implements OnInit {
+  @ViewChild('listNameInput') listNameInput!: IonInput;
   @Input() listToEdit: List | null = null;
+
   myForm!: FormGroup;
   isEditing: boolean = false;
   circleColors: string[] = ['yellow', 'orange', 'red', 'pink', 'purple', 'blue', 'blue-light', 'turquoise', 'green-light', 'green'];
@@ -34,6 +36,12 @@ export class AddListModalPage implements OnInit {
   ngOnInit() {
     this.setupData();
     this.setupForm();
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.listNameInput.setFocus();
+    }, 200);
   }
 
   setupData(): void {

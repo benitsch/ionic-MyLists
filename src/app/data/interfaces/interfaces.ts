@@ -1,5 +1,4 @@
 import Store from "@shared/models/Store";
-// import {Timestamp} from "@angular/fire/firestore";
 import {FieldValue} from "@firebase/firestore";
 
 export interface Article {

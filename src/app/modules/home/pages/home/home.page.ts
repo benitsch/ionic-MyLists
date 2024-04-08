@@ -1,7 +1,7 @@
-import {Component, inject, OnInit, Optional} from '@angular/core';
+import {Component, OnInit, Optional, ViewChild} from '@angular/core';
 import {DataService} from "@data/services/api/data.service";
 import List from "@shared/models/List";
-import {AlertController, IonRouterOutlet, ItemReorderEventDetail, ModalController, Platform} from "@ionic/angular";
+import {AlertController, IonList, IonRouterOutlet, ItemReorderEventDetail, ModalController, Platform} from "@ionic/angular";
 import {AddListModalPage} from "@modules/home/pages/addList/addListModal.page";
 import {AuthService} from "@data/services/authentication/auth.service";
 import {BarcodeFormat, BarcodeScanner} from "@capacitor-mlkit/barcode-scanning";
@@ -13,15 +13,15 @@ import {App} from "@capacitor/app";
   styleUrls: ['./home.page.scss'],
 })
 export class HomePage implements OnInit {
+  @ViewChild('list') list!: IonList;
+  
   lists: List[] = [];
   isLoading: boolean = false;
-  // TODO change var name to isEditEnabled oder so, da es nicht nur um reordering geht
-  isReorderDisabled: boolean = true;
-
-  private dataService = inject(DataService);
+  isEditDisabled: boolean = true;
 
   constructor(
     private authService: AuthService,
+    private dataService: DataService,
     private modalController: ModalController,
     private alertController: AlertController,
     private platform: Platform,
@@ -39,6 +39,9 @@ export class HomePage implements OnInit {
     this.setupLists();
   }
 
+  /**
+   * Get all lists and their article amount from BE.
+   */
   async setupLists(): Promise<void> {
     this.isLoading = true;
     try {
@@ -47,12 +50,11 @@ export class HomePage implements OnInit {
       console.error("Error: ", e);
     }
 
-    for (let i = 0; i < this.lists.length; i++) {
+    for (let i = 0, len = this.lists.length; i < len; i++) {
       const list = this.lists[i];
-      // FIXME wenn ich ein artikel zu einer liste hinzufüge und dann zurück zur listenübersicht gehe stimmt der amount of articles nicht mehr.
+      // FIXME When I add a new article and go back to the list overview, the amount of articles are not up-to-date
       list.articlesCount = await this.dataService.getArticleAmountByListId(list.docId);
       // list.amountOfUsers = await this.dataService.getUsersAmountByListId(list.docId);
-      // TODO hier weiter machen, checken wie ich das machen kann die func getUsersAmountByListId
       // console.log(list.amountOfUsers);
       // this.test = Array(list.amountOfUsers).fill(0);
       // console.log(this.test);
@@ -62,7 +64,6 @@ export class HomePage implements OnInit {
   }
 
   deleteList(list: List): void {
-    // TODO villt. den side scroll für delete nur im edit mode enablen/anzeigen?
     const index = this.lists.indexOf(list);
     if (index !== -1) {
       this.lists.splice(index, 1);
@@ -71,33 +72,17 @@ export class HomePage implements OnInit {
   }
 
   toggleEdit(): void {
-    this.isReorderDisabled = !this.isReorderDisabled;
+    this.isEditDisabled = !this.isEditDisabled;
+    if (this.isEditDisabled) {
+      this.list.closeSlidingItems();
+    }
   }
 
-  handleReorder(ev: CustomEvent<ItemReorderEventDetail>): void {
-    // console.log(ev);
-    // // The `from` and `to` properties contain the index of the item
-    // // when the drag started and ended, respectively
-    // console.log('Dragged from index', ev.detail.from, 'to', ev.detail.to);
-    //
-    // // Finish the reorder and position the item in the DOM based on
-    // // where the gesture ended. This method can also be called directly
-    // // by the reorder group
-    // ev.detail.complete();
-    // TODO implement reorder
-    const moveFromPosition = ev.detail.from;
-    const moveToPosition = ev.detail.to;
-
-    // Ihre spezifische Logik zur Aktualisierung der Reihenfolge hier einfügen
-
-    // Beispiel: Tauschen Sie die Elemente in einem Array
-    this.lists.splice(moveToPosition, 0, this.lists.splice(moveFromPosition, 1)[0]);
-
-    // Hier können Sie auch Ihre spezifische Logik für die Datenbank oder Service-Aktualisierung einfügen
-
-    ev.detail.complete();
-  }
-
+  /**
+   * Opens the modal for editing an existing list or add a new list.
+   * 
+   * @param { List | null} listToEdit List object when you want to edit a list, otherwise null for adding a new list
+   */
   async openAddListModal(listToEdit: List | null = null): Promise<void> {
     const modal = await this.modalController.create({
       component: AddListModalPage,
@@ -109,21 +94,25 @@ export class HomePage implements OnInit {
 
     const rs = await modal.onWillDismiss();
     if (rs.data) {
-      if (listToEdit) {
-        // Update existing list
+      if (listToEdit) { // Update existing list
         this.dataService.updateList(rs.data as List);
-      } else {
-        // Add new list
+      } else { // Add new list
         this.lists.push(rs.data as List);
         this.dataService.addList(rs.data).then((value) => rs.data.docId = value);
       }
     }
 
-    if (!this.isReorderDisabled) {
+    if (!this.isEditDisabled) {
       this.toggleEdit();
     }
   }
 
+  /**
+   * Opens the camera to scan a QR code from another person to add that person to the given list.
+   * If the scanning process or adding the user to the list fails, an alert message is shown.
+   * 
+   * @param {List} list 
+   */
   async openCamera(list: List): Promise<void> {
     const scannedData = await this.scan();
     if (!scannedData) {
@@ -138,28 +127,31 @@ export class HomePage implements OnInit {
   }
 
   async handleRefresh(event: any): Promise<void> {
-    // FIXME "Unhandled Promise rejection" error, da es async await ist, sonst kein error in der console.
+    // FIXME "Unhandled Promise rejection" error, because its async await (without no errors in console)
     await this.setupLists();
     // await this.setupLists().catch(e => console.log(e));
     event.target.complete();
   }
 
+  /**
+   * Will install the Google Barcode Scanner module, if not available.
+   * At the moment only Android is supported (no iOS).
+   */
   async setupBarcodeScanner(): Promise<void> {
     try {
-      const {available} =
-        await BarcodeScanner.isGoogleBarcodeScannerModuleAvailable();
+      const {available} = await BarcodeScanner.isGoogleBarcodeScannerModuleAvailable();
 
       if (!available) {
-        console.log("installGoogleBarcodeScannerModule");
         await BarcodeScanner.installGoogleBarcodeScannerModule();
-      } else {
-        console.log("not installGoogleBarcodeScannerModule");
       }
     } catch (e) {
       console.log("Error:", e);
     }
   }
 
+  /**
+   * Returns the scanned barcode value if camera access is granted, otherwise an alert message is shown.
+   */
   async scan(): Promise<string | void> {
     const granted = await this.requestPermissions();
     if (!granted) {
@@ -174,6 +166,11 @@ export class HomePage implements OnInit {
     return barcodes.length > 0 ? barcodes[0].displayValue : '';
   }
 
+  /**
+   * Checks the permissions to allow camera access.
+   * 
+   * @returns True if the camera access is granted or limited, otherwise false
+   */
   async requestPermissions(): Promise<boolean> {
     const {camera} = await BarcodeScanner.requestPermissions();
     return camera === 'granted' || camera === 'limited';
@@ -190,5 +187,31 @@ export class HomePage implements OnInit {
 
   userIsListOwner(list: List): boolean {
     return this.authService.getCurrentUserId() === list.createdBy;
+  }
+
+  
+  /**
+   * TODO implementation
+   * 
+   * @param ev 
+   */
+  handleReorder(ev: CustomEvent<ItemReorderEventDetail>): void {
+    // console.log(ev);
+    // // The `from` and `to` properties contain the index of the item
+    // // when the drag started and ended, respectively
+    // console.log('Dragged from index', ev.detail.from, 'to', ev.detail.to);
+    //
+    // // Finish the reorder and position the item in the DOM based on
+    // // where the gesture ended. This method can also be called directly
+    // // by the reorder group
+    // ev.detail.complete();
+
+    const moveFromPosition = ev.detail.from;
+    const moveToPosition = ev.detail.to;
+
+    // swap items in array
+    this.lists.splice(moveToPosition, 0, this.lists.splice(moveFromPosition, 1)[0]);
+
+    ev.detail.complete();
   }
 }

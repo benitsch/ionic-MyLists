@@ -6,13 +6,7 @@ import {ListPageModule} from "@modules/list/list.module";
 import {StoresPageModule} from "@modules/stores/stores.module";
 import {QrCodePageModule} from "@modules/qr-code/qr-code.module";
 import {LoginPageModule} from "@modules/login/login.module";
-import {
-  canActivate,
-  redirectLoggedInTo,
-  redirectUnauthorizedTo,
-  emailVerified,
-  AuthPipeGenerator
-} from "@angular/fire/auth-guard";
+import {canActivate, AuthPipeGenerator} from "@angular/fire/auth-guard";
 import {ForgotPasswordPageModule} from "@modules/forgot-password/forgot-password.module";
 import {RegisterPageModule} from "@modules/register/register.module";
 import {map} from "rxjs";

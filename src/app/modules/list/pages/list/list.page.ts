@@ -1,7 +1,7 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DataService} from "@data/services/api/data.service";
-import {Article, StoreArticles} from "@data/interfaces/interfaces";
+import {Article, StoreArticles, StoreNamesArray} from "@data/interfaces/interfaces";
 import List from "@shared/models/List";
 import {ModalController} from "@ionic/angular";
 import {AddArticleModalPage} from "@modules/list/pages/addArticle/addArticleModal.page";
@@ -20,10 +20,11 @@ export class ListPage implements OnInit {
 
   isLoading: boolean = false;
 
-  private dataService = inject(DataService);
-  private activatedRoute = inject(ActivatedRoute);
-
-  constructor(public modalController: ModalController) {
+  constructor(
+    public modalController: ModalController,
+    private dataService: DataService,
+    private activatedRoute: ActivatedRoute
+    ) {
     this.listId = this.activatedRoute.snapshot.paramMap.get('id') as string;
   }
 
@@ -46,7 +47,7 @@ export class ListPage implements OnInit {
   }
 
   /**
-   * Deletes all articles at the server which were checked in the past.
+   * Deletes all articles in BE which were checked in the past.
    * Returns a list of articles where "checked" is not older than yesterday.
    *
    * @param {Article[]} articles
@@ -76,9 +77,14 @@ export class ListPage implements OnInit {
 
   setupSegments(): void {
     this.storeItems = this.list.getSortedArticles();
+    console.log(this.storeItems);
     // FIXME when i delete articles, the first elm for selectedStore is sometimes different (alphabetically?).
-    // Ebenso wenn ich artikel von stores lösche, dann soll er den letzten verbleibenden store (segment) auswählen (this.selectedStore setzen).
+    // When I delete the last article of a store, select/show another store, instead of showing no store.
     this.selectedStore = Object.keys(this.storeItems)[0];
+  }
+
+  showLabel(): boolean {
+    return Object.keys(this.storeItems).length < 3;
   }
 
   async openAddArticleModal() {
@@ -102,14 +108,19 @@ export class ListPage implements OnInit {
   }
 
   deleteArticle(article: Article): void {
-    // FIXME nach dem löschen eines artikels, geht das scroll text bei langem artikel namen nicht mehr
-    // Auch wenn ich die Stores/Segments wechsel
+    // FIXME After deleting an article, the automatically horizontal scroll for longer article names do not work anymore
     this.list.deleteArticle(article);
     this.storeItems = this.list.getSortedArticles();
     this.dataService.deleteArticle(this.listId, article);
   }
 
-  getSvgPathForStore(storeName: string): string {
+  /**
+   * TODO use constants instead of strings.
+   * 
+   * @param storeName 
+   * @returns
+   */
+  getSvgPathForStore(storeName: typeof StoreNamesArray[number]): string {
     switch (storeName) {
       case 'Adeg':
         return 'assets/images/stores/adeg.svg';
@@ -137,6 +148,8 @@ export class ListPage implements OnInit {
         return 'assets/images/stores/spar.svg';
       case 'Unimarkt':
         return 'assets/images/stores/unimarkt.svg';
+      case 'Lidl':
+        return 'assets/images/stores/lidl.svg';
       default:
         return 'assets/images/stores/default.svg';
     }

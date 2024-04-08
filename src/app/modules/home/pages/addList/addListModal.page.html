@@ -10,7 +10,7 @@
 <ion-content>
   <form [formGroup]="myForm">
     <ion-item [button]="true" [detail]="false" lines="none">
-      <ion-input formControlName="listName" label="Listenname" labelPlacement="floating"
+      <ion-input #listNameInput formControlName="listName" label="Listenname" labelPlacement="floating" autocapitalize="sentences"
                  value="{{ listName.value }}" errorText="Ein Listenname ist erforderlich.">
       </ion-input>
     </ion-item>

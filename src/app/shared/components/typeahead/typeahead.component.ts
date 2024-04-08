@@ -1,7 +1,8 @@
-import {Component, Output, EventEmitter, inject, Input} from '@angular/core';
+import {Component, Output, EventEmitter, Input, ViewChild} from '@angular/core';
 import type {OnInit} from '@angular/core';
 import {DataService} from "@data/services/api/data.service";
 import {SuggestedArticle} from "@data/interfaces/interfaces";
+import {IonInput} from "@ionic/angular";
 
 @Component({
   selector: 'app-typeahead',
@@ -9,6 +10,7 @@ import {SuggestedArticle} from "@data/interfaces/interfaces";
   styleUrls: ['./typeahead.component.scss'],
 })
 export class TypeaheadComponent implements OnInit {
+  @ViewChild('articleNameInput') articleNameInput!: IonInput;
   @Input() articleName: string = '';
   @Output() addIconClick = new EventEmitter<string>();
   @Output() suggestionClick = new EventEmitter<SuggestedArticle>();
@@ -17,10 +19,17 @@ export class TypeaheadComponent implements OnInit {
   suggestedArticles: SuggestedArticle[] = [];
   filteredSuggestedArticles: SuggestedArticle[] = [];
 
-  private dataService = inject(DataService);
+  constructor(private dataService: DataService)
+  {}
 
   ngOnInit() {
     this.loadArticleSuggestions();
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.articleNameInput.setFocus();
+    }, 200);
   }
 
   async loadArticleSuggestions(): Promise<void> {
@@ -46,25 +55,10 @@ export class TypeaheadComponent implements OnInit {
     this.filterList(ev.target.value);
   }
 
-  /**
-   * Update the rendered view with
-   * the provided search query. If no
-   * query is provided, all data
-   * will be rendered.
-   */
   filterList(searchQuery: string | undefined): void {
-    /**
-     * If no search query is defined,
-     * return all options.
-     */
     if (searchQuery === undefined) {
       this.filteredSuggestedArticles = [...this.suggestedArticles];
     } else {
-      /**
-       * Otherwise, normalize the search
-       * query and check to see which items
-       * contain the search query as a substring.
-       */
       const normalizedQuery = searchQuery.toLowerCase();
       this.filteredSuggestedArticles = this.suggestedArticles.filter((item: SuggestedArticle) => {
         return item.name.toLowerCase().includes(normalizedQuery);

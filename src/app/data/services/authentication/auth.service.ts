@@ -21,15 +21,20 @@ export class AuthService {
   ) {
   }
 
+  /**
+   * Create a new user with their e-mail address and password. The e-mail confirmation e-mail is then sent and the user's name is updated.
+   * 
+   * @param {string} name
+   * @param {string} email
+   * @param {string} password
+   * @returns {Promise<UserCredential | null>} Returns the user credentials on success, otherwise null
+   */
   async register(name: string, email: string, password: string): Promise<UserCredential | null> {
-    console.log("register");
     try {
-      console.log("createUserWithEmailAndPassword");
       const userCredential: UserCredential = await createUserWithEmailAndPassword(this.auth, email, password);
-      console.log("sendEmailVerification");
       await sendEmailVerification(userCredential.user);
       await this.updateUserName(name);
-      console.log(userCredential);
+
       return userCredential;
     } catch (e) {
       console.log('Error: ', e);
@@ -37,6 +42,10 @@ export class AuthService {
     }
   }
 
+  /**
+   * @param param0 The email address and password
+   * @returns Returns true if the login was successful, otherwise false
+   */
   async login({email, password}: any): Promise<UserCredential | null> {
     try {
       return await signInWithEmailAndPassword(this.auth, email, password);
@@ -46,9 +55,14 @@ export class AuthService {
     }
   }
 
+  /**
+   * @param param0 The email address
+   * @returns Returns true if email reset was successful, otherwise false
+   */
   async resetPassword({email}: any): Promise<boolean> {
     try {
       await sendPasswordResetEmail(this.auth, email);
+
       return true;
     } catch (e) {
       console.log('Error: ', e);
@@ -64,8 +78,10 @@ export class AuthService {
     }
   }
 
+  /**
+   * @param {string} name 
+   */
   async updateUserName(name: string): Promise<void> {
-    console.log("updateUserName");
     try {
       const currentUser: User | null = this.getCurrentUser();
       if (currentUser) {

@@ -1,5 +1,4 @@
 .store-tile {
-  //background: linear-gradient(to top left, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
   height: 100px;
   min-height: 100px;
   width: 100px;
@@ -21,7 +20,7 @@
   top: 5px;
   right: 5px;
   z-index: 1;
-  color: gold; /* Farbe des Sterns anpassen */
+  color: gold;
 }
 
 .store-background {

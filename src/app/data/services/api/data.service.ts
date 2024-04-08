@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import Store from '@app/shared/models/Store';
 import List from '@app/shared/models/List';
 import {Article, ArticleCategoryArray, SuggestedArticle} from "@data/interfaces/interfaces";
@@ -12,7 +12,6 @@ import {
   getDocs,
   setDoc,
   serverTimestamp,
-  Timestamp,
   updateDoc,
   getCountFromServer,
   writeBatch,
@@ -22,16 +21,13 @@ import {User} from "@angular/fire/auth";
 import {
   ARTICLE_CATEGORIES,
   ARTICLE_CATEGORIES_DOC_ID,
-  ARTICLE_CATEGORIES_FIELD_NAME,
   ARTICLES, SHARED_SHOPPING_LISTS,
   SHOPPING_LIST_ARTICLES,
   SHOPPING_LISTS,
   STORES,
   STORES_DEFAULT_DOC_ID,
-  STORES_FIELD_NAME,
   SUGGESTED_ARTICLES,
   SUGGESTED_ARTICLES_DOC_ID,
-  SUGGESTED_ARTICLES_FIELD_NAME,
   USER_SHOPPING_LISTS, USERS
 } from "@data/constants/constants";
 import {
@@ -42,7 +38,6 @@ import {
   suggestedArticlesConverter
 } from "@data/converter/converter";
 import {AuthService} from "@data/services/authentication/auth.service";
-import {AngularFirestore} from "@angular/fire/compat/firestore";
 
 
 @Injectable({
@@ -50,11 +45,14 @@ import {AngularFirestore} from "@angular/fire/compat/firestore";
 })
 export class DataService {
 
-  firestoreDb: Firestore = inject(Firestore);
-
-  constructor(private authService: AuthService,) {
+  constructor(
+    private authService: AuthService,
+    private firestoreDb: Firestore) {
   }
 
+  /**
+   * Returns all lists of the user currently logged in.
+   */
   public async getLists(): Promise<List[]> {
     const result: List[] = [];
     try {
@@ -64,7 +62,6 @@ export class DataService {
       }
       const querySnapshot = await getDocs(collection(this.firestoreDb, SHOPPING_LISTS, userId, USER_SHOPPING_LISTS).withConverter(listConverter));
       querySnapshot.forEach((doc) => {
-        // console.log(doc.id, " => ", doc.data());
         const rsData = doc.data();
         result.push(rsData as List);
       });
@@ -75,6 +72,11 @@ export class DataService {
     return result;
   }
 
+  /**
+   * Returns the amount of all articles by the given list.
+   * 
+   * @param {string} listId 
+   */
   public async getArticleAmountByListId(listId: string): Promise<number> {
     try {
       const coll = collection(this.firestoreDb, ARTICLES, listId, SHOPPING_LIST_ARTICLES);
@@ -87,6 +89,12 @@ export class DataService {
     return 0;
   }
 
+  /**
+   * Add the given list to the currently logged in user.
+   * 
+   * @param {List} list 
+   * @returns The new document ID
+   */
   public async addList(list: List): Promise<string> {
     try {
       const userId = this.authService.getCurrentUserId();
@@ -104,6 +112,13 @@ export class DataService {
     }
   }
 
+  /**
+   * Checks whether the specified user exists, if so, it is added to the given list.
+   * 
+   * @param {List} list 
+   * @param {string} userIdToAdd The user id
+   * @returns Returns true if it was successful to add the given user to the given list, otherwise false
+   */
   public async addUserToList(list: List, userIdToAdd: string): Promise<boolean> {
     if (await this.userExists(userIdToAdd)) {
       try {
@@ -122,6 +137,12 @@ export class DataService {
     return false;
   }
 
+  /**
+   * If the currently logged in user is the owner of the given list, the new user is added to the given list.
+   * 
+   * @param {List} list 
+   * @param {string} userIdToAdd 
+   */
   private async addUserToSharedShoppingList(list: List, userIdToAdd: string): Promise<void> {
     try {
       const userId = this.authService.getCurrentUserId();
@@ -149,6 +170,9 @@ export class DataService {
     }
   }
 
+  /**
+   * @param {List} list 
+   */
   public updateList(list: List): void {
     try {
       const userId = this.authService.getCurrentUserId();
@@ -162,9 +186,12 @@ export class DataService {
     }
   }
 
+  /**
+   * Deletes the given list and if the current logged in user is the owner of the given list it will delete all its articles as well.
+   * 
+   * @param list 
+   */
   public deleteList(list: List): void {
-    console.log("deleteList:", list.docId);
-    // TODO when I'm the owner of a shared list and I delete the list, the list should be deleted in all shared users as well
     try {
       const userId = this.authService.getCurrentUserId();
       if (!userId) {
@@ -175,7 +202,6 @@ export class DataService {
       if (list.createdBy === userId) {
         this.deleteAllArticles(list.docId);
         // TODO if it is a shared list and I'm the owner, delete from SHARED_SHOPPING_LISTS and delete list from all users within.
-        // Atomically remove a region from the "regions" array field.
         // await updateDoc(docRef, {
         //   users: arrayRemove(userIdToAdd)
         // });
@@ -186,6 +212,9 @@ export class DataService {
     }
   }
 
+  /**
+   * @param {string} listId 
+   */
   private async deleteAllArticles(listId: string): Promise<void> {
     try {
       const articlesCollectionRef = collection(this.firestoreDb, ARTICLES, listId, SHOPPING_LIST_ARTICLES);
@@ -202,6 +231,12 @@ export class DataService {
     }
   }
 
+  /**
+   * Returns the List by its given Id. If the user is not logged in or the list does not exists, null is returned.
+   * 
+   * @param {string} listId 
+   * @returns {List | null} <List> if the listId exists, otherwise <null>.
+   */
   public async getListById(listId: string): Promise<List | null> {
     let result: List | null = null;
 
@@ -222,29 +257,15 @@ export class DataService {
     return result;
   }
 
+  /**
+   * @param {string} id 
+   */
   public async getArticlesByListId(id: string): Promise<Article[]> {
     const result: Article[] = [];
-
-    // const yesterday = new Date();
-    // yesterday.setDate(yesterday.getDate() - 1);
-
     try {
       const querySnapshot = await getDocs(collection(this.firestoreDb, ARTICLES, id, SHOPPING_LIST_ARTICLES).withConverter(articleConverter));
       querySnapshot.forEach((doc) => {
-        // console.log(doc.id, " => ", doc.data());
         const rsData = doc.data() as Article;
-        // const checkedTimestampField = rsData.checkedTimestamp;
-        //
-        // if (checkedTimestampField && checkedTimestampField instanceof Timestamp) {
-        //   // const checkedTimestamp: Timestamp = checkedTimestampField;
-        //   const jsTimestamp = new Date(checkedTimestampField.toMillis());
-        //
-        //   if (jsTimestamp < yesterday) {
-        //     console.log('Der checkedTimestamp ist von gestern.');
-        //     // result.push(rsData);
-        //   }
-        // }
-
         result.push(rsData);
       });
     } catch (e) {
@@ -254,13 +275,20 @@ export class DataService {
     return result;
   }
 
+  /**
+   * Adds the given article to the given list.
+   * 
+   * @param {string} listId 
+   * @param {Article} article 
+   * @returns The new document ID
+   */
   public async addArticle(listId: string, article: Article): Promise<string> {
     try {
       const newDocRef = await addDoc(
         collection(this.firestoreDb, ARTICLES, listId, SHOPPING_LIST_ARTICLES)
           .withConverter(articleConverter),
         article);
-      // console.log('New document added with ID:', newDocRef.id);
+
       return newDocRef.id;
     } catch (e) {
       console.error("Error: ", e);
@@ -268,10 +296,15 @@ export class DataService {
     }
   }
 
+  /**
+   * Update the given article in the given list.
+   * 
+   * @param {string} listId 
+   * @param {Article} article 
+   */
   public updateArticle(listId: string, article: Article): void {
     try {
       const docRef = doc(this.firestoreDb, ARTICLES, listId, SHOPPING_LIST_ARTICLES, article.docId);
-
       const currentTime = serverTimestamp();
 
       updateDoc(docRef, {
@@ -283,6 +316,10 @@ export class DataService {
     }
   }
 
+  /**
+   * @param {string} listId 
+   * @param {Article} article 
+   */
   public deleteArticle(listId: string, article: Article): void {
     try {
       const docRef = doc(this.firestoreDb, ARTICLES, listId, SHOPPING_LIST_ARTICLES, article.docId);
@@ -324,6 +361,11 @@ export class DataService {
     return result;
   }
 
+  /**
+   * Returns user specific stores (with its favourites), otherwise it will creates and returns the stores.
+   * 
+   * @returns An array of Store objects
+   */
   public async getStores(): Promise<Store[]> {
     let result: Store[] = [];
 
@@ -337,7 +379,6 @@ export class DataService {
       if (docSnap.exists()) {
         result = this.sortItems(docSnap.data()) as Store[];
       } else {
-        console.log("stores do NOT exists");
         result = this.sortItems(await this.createUserStores(userId)) as Store[];
       }
     } catch (e) {
@@ -347,15 +388,20 @@ export class DataService {
     return result;
   }
 
-  private async createUserStores(userId: string) {
-    console.log("createUserStores");
+  /**
+   * Copies the default stores to the given user.
+   * 
+   * @param {string} userId 
+   * @returns An array of Store objects
+   */
+  private async createUserStores(userId: string): Promise<Store[]> {
     let result: Store[] = [];
     try {
       const docRef = doc(this.firestoreDb, STORES, STORES_DEFAULT_DOC_ID).withConverter(storeConverter);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        console.log("default exists - save now as user specific");
         const newDocRef = doc(this.firestoreDb, STORES, userId).withConverter(storeConverter);
+
         setDoc(newDocRef, docSnap.data());
         result = docSnap.data();
       }
@@ -364,9 +410,12 @@ export class DataService {
     }
 
     return result;
-
   }
 
+  /**
+   * @param {Store} stores 
+   * @returns void
+   */
   public updateStore(stores: Store[]): void {
     try {
       const userId = this.authService.getCurrentUserId();
@@ -380,6 +429,9 @@ export class DataService {
     }
   }
 
+  /**
+   * @param {User} user 
+   */
   public async createUser(user: User): Promise<void> {
     try {
       await setDoc(doc(this.firestoreDb, USERS, user.uid), {
@@ -392,11 +444,16 @@ export class DataService {
     }
   }
 
+  /**
+   * @param {string} userId 
+   * @returns Returns true if the given user exists, otherwise false
+   */
   private async userExists(userId: string): Promise<boolean> {
     const docRef = doc(this.firestoreDb, USERS, userId);
 
     try {
       const docSnapshot = await getDoc(docRef);
+      
       return docSnapshot.exists();
     } catch (e) {
       console.error("Error: ", e);
@@ -405,14 +462,18 @@ export class DataService {
     return false;
   }
 
-
+  /**
+   * TODO implementation
+   * @param {string} userId 
+   * @returns 
+   */
   public async getUserAvatar(userId: string): Promise<string | null> {
-
     const docRef = doc(this.firestoreDb, USERS, userId);
 
     try {
       const docSnapshot = await getDoc(docRef);
       console.log(docSnapshot.data());
+
       return null;
     } catch (e) {
       console.error("Error: ", e);
@@ -421,6 +482,12 @@ export class DataService {
     return null;
   }
 
+  /**
+   * Sorts the given array by its properties (first by isFavourite, then by category).
+   * 
+   * @param {Store[]} items 
+   * @returns The sorted Store[]
+   */
   private sortItems(items: Store[]): Store[] {
     const sortedItems = [...items];
 

@@ -45,7 +45,7 @@
     </ion-item>
 
     <ion-item *ngIf="inSale?.value" lines="inset">
-      <ion-label>Valid From</ion-label>
+      <ion-label>Gültig von</ion-label>
       <ion-datetime-button datetime="validFromDateTime">
       </ion-datetime-button>
 
@@ -58,7 +58,7 @@
     </ion-item>
 
     <ion-item *ngIf="inSale?.value" lines="inset">
-      <ion-label>Valid Until</ion-label>
+      <ion-label>Gültig bis</ion-label>
       <ion-datetime-button datetime="validToDateTime"></ion-datetime-button>
       <ion-modal [keepContentsMounted]="true">
         <ng-template>

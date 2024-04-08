@@ -18,9 +18,9 @@
   </ion-refresher>
 
   <ng-container *ngIf="list.articles.length; else noArticles">
-    <ion-segment [(ngModel)]="selectedStore">
+    <ion-segment [scrollable]="true" [(ngModel)]="selectedStore">
       <ion-segment-button *ngFor="let store of storeItems | keyvalue" layout="icon-start" [value]="store.key">
-        <ion-label>{{store.key}}</ion-label>
+        <ion-label *ngIf="showLabel()">{{store.key}}</ion-label>
         <ion-icon src="{{getSvgPathForStore(store.key)}}"></ion-icon>
       </ion-segment-button>
     </ion-segment>
@@ -28,7 +28,7 @@
     <ng-container *ngFor="let store of storeItems | keyvalue">
       <ng-container *ngIf="selectedStore === store.key">
         <ng-container *ngFor="let category of store.value | keyvalue">
-          <ion-list lines="none" class="bg-transparent">
+          <ion-list lines="none" class="bg-transparent list">
             <ion-list-header lines="full" color="light">
               <ion-label style="display: flex;">
                 {{category.key}}
@@ -42,6 +42,7 @@
       </ng-container>
     </ng-container>
   </ng-container>
+  <div class="m-bottom"></div>
 
   <ng-template #noArticles>
     <div class="no-articles-container">

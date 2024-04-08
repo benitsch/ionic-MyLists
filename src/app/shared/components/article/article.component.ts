@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {Article} from "@data/interfaces/interfaces";
 import {DataService} from "@data/services/api/data.service";
 import {
@@ -16,16 +16,13 @@ import {
 export class ArticleComponent {
   @ViewChild('checkboxContainer') checkboxContainer!: ElementRef<HTMLElement>;
   @ViewChild('articleName') articleName!: ElementRef<HTMLElement>;
-
   @Input() article!: Article;
   @Input() listId: string = '';
   @Output() deleteArticleEvent = new EventEmitter<Article>();
 
-  private dataService = inject(DataService);
-
   private prefersDark = false;
 
-  constructor() {
+  constructor(private dataService: DataService) {
     this.prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
 

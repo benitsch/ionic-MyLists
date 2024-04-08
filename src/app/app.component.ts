@@ -20,7 +20,7 @@ export class AppComponent {
 
   imagePath = 'assets/avatar/default.png';
 
-// TODO maybe move the the side menu to home page, then i do not need this enable disable on view enter/leave on login/register/forgot-pw page.
+  // TODO Move the side menu to home page, because it's not needed to enable-disable on view enter/leave on login/register/forgot-pw page.
   constructor(
     private authService: AuthService,
     private dataService: DataService,
@@ -41,8 +41,7 @@ export class AppComponent {
     return this.authService.getCurrentUser()?.email;
   }
 
-// TODO hier weiter machen: Ich weiß nicht wie ich das avatar vom user laden soll wenn es
-  // noch nicht verfügbar ist....
+  // TODO Load avatar from user (check how to load avatar when user is not ready loaded): 
 
   // setUserAvatarImagePath() {
   //   console.log('setUserAvatarImagePath');
@@ -80,8 +79,7 @@ export class AppComponent {
   // }
 
   async logout() {
-    // TODO wenn ich mich auslogge, dann kommt der redirect zu login page, aber der übergang zwischen den Seiten
-    // ist nicht schön, da man auf der login seite noch kurz die vorherige Seite sieht.
+    // TODO Page load transition from ionic is not beautiful & smooth.
     await this.authService.logout();
     this.router.navigateByUrl('/', {replaceUrl: true});
   }

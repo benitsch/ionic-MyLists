@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import Store from "@shared/models/Store";
 import {DataService} from "@data/services/api/data.service";
 
@@ -12,10 +12,9 @@ export class StoresPage implements OnInit {
 
   isLoading: boolean = false;
 
-  private dataService = inject(DataService);
 
-  constructor() {
-  }
+  constructor(private dataService: DataService)
+  {}
 
   ngOnInit() {
     this.loadStores()

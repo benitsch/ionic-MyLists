@@ -3,7 +3,6 @@
   display: flex;
   align-items: center;
   font-size: 0.9375rem;
-  //text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
@@ -20,8 +19,4 @@
 
 .text-divider::after {
   margin-left: var(--text-divider-gap);
-}
-
-ion-content {
-  //--background: transparent url('../../../../../assets/images/abstract.jpg') no-repeat center center / cover;
 }

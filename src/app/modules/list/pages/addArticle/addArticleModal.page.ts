@@ -1,4 +1,4 @@
-import {Component, inject, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {IonModal, ModalController} from '@ionic/angular';
 import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {Article, ArticleCategoryArray, StoreNamesArray, SuggestedArticle} from "@data/interfaces/interfaces";
@@ -12,7 +12,6 @@ import {DataService} from "@data/services/api/data.service";
 })
 export class AddArticleModalPage implements OnInit {
   @ViewChild('articleSuggestionModal', {static: true}) articleSuggestionModal!: IonModal;
-
   @Input() currentStore?: typeof StoreNamesArray[number]; // Users current selected store segment to set its name as default value in form.
 
   articleCategories: typeof ArticleCategoryArray[number][] = [];
@@ -21,10 +20,11 @@ export class AddArticleModalPage implements OnInit {
   minValidUntil!: string;
   myForm!: FormGroup;
 
-  private dataService = inject(DataService);
-
-  constructor(private modalController: ModalController, private formBuilder: FormBuilder) {
-  }
+  constructor(
+    private dataService: DataService,
+    private modalController: ModalController,
+    private formBuilder: FormBuilder
+    ) {}
 
   ngOnInit() {
     this.setupForm();
@@ -138,7 +138,7 @@ export class AddArticleModalPage implements OnInit {
   updateMinValidUntil(): void {
     if (this.validFrom) {
       const minDate = new Date(this.validFrom.value);
-      minDate.setDate(minDate.getDate() + 1); // Add one day
+      minDate.setDate(minDate.getDate() + 1);
       this.minValidUntil = minDate.toISOString();
     }
   }

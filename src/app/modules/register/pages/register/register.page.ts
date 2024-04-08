@@ -20,7 +20,6 @@ import {DataService} from "@data/services/api/data.service";
   styleUrls: ['./register.page.scss'],
 })
 export class RegisterPage implements OnInit {
-
   myForm!: FormGroup;
 
   constructor(

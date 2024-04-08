@@ -3,7 +3,6 @@ import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {AuthService} from "@data/services/authentication/auth.service";
 import {Router} from "@angular/router";
 import {AlertController, LoadingController, MenuController} from "@ionic/angular";
-import {UserCredential} from "@angular/fire/auth";
 
 @Component({
   selector: 'app-login',
@@ -70,16 +69,17 @@ export class LoginPage implements OnInit {
     const user = await this.authService.login(this.myForm.value);
     await loading.dismiss();
 
-    if (user) {
-      if (!user.user.emailVerified) {
-        this.showAlert('Login fehlgeschlagen', 'Dein Account ist noch nicht verifiziert, bitte überprüfe dein E-Mail Postfach.');
-        return;
-      }
-
-      this.router.navigateByUrl('/home', {replaceUrl: true});
-    } else {
+    if (!user){
       this.showAlert('Login fehlgeschlagen', 'Bitte versuche es erneut!');
+      return;
     }
+
+    if (!user.user.emailVerified) {
+      this.showAlert('Login fehlgeschlagen', 'Dein Account ist noch nicht verifiziert, bitte überprüfe dein E-Mail Postfach.');
+      return;
+    }
+
+    this.router.navigateByUrl('/home', {replaceUrl: true});
   }
 
   async showAlert(header: string, message: string) {

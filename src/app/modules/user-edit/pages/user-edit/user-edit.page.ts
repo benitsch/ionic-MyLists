@@ -12,11 +12,5 @@ export class UserEditPage implements OnInit {
 
   ngOnInit() {}
 
-
-
-  // TODO hier weiter machen:
-  // Namen ändern können.
-  // Avatar icon ändern können und dann in der Listenübersicht das Icon des users (ebenso shared Lists) anzeigen.
-
-
+  // TODO - change name, change avatar icon (to show in list overview a small avatar icon)
 }
